@@ -3,7 +3,7 @@ name: Compare zips and build
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 6 * * *' # This cron expression means the action will run every day at midnight UTC
+    - cron: '0 6 * * *'
 
 
 permissions: 
