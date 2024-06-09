@@ -6,3 +6,13 @@ This repo contains a [WixSharp](https://github.com/oleg-shilo/wixsharp) project 
 You can find the latest build in the releases.
 
 The msi setup is intended to be compatible with [Winget](https://github.com/microsoft/winget-cli). Although that's still a work in progress.
+
+## How it works?
+
+The [github workflow](https://github.com/jpiolho/FTEQCC-Setup/blob/main/.github/workflows/build.yaml) does the following:
+
+1. Parses FTEQCC website to fetch the latest build date
+2. Compares build date with the one in [this file](https://github.com/jpiolho/FTEQCC-Setup/blob/main/last_build_date.txt)
+3. If date differs, then it proceeds with downloading both FTEQCC GUI and Console zip files. If the date is the same then nothing happens.
+4. Extracts zips, builds the setup
+5. Creates a Github release
