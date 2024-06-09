@@ -7,6 +7,13 @@ You can find the latest build in the releases.
 
 The msi setup is intended to be compatible with [Winget](https://github.com/microsoft/winget-cli). Although that's still a work in progress.
 
+## What does the setup do?
+The msi setup installs FTEQCC as a normal app on your computer. It includes both console and gui version.
+
+* Shortcuts for the gui version get added to both Start Menu and Desktop
+* The install path gets added to `PATH` so you can call the console version from your terminal using `fteqcc`
+* Install path is `C:\Program Files\FTEQCC` and cannot be changed
+
 ## How it works?
 
 The [github workflow](https://github.com/jpiolho/FTEQCC-Setup/blob/main/.github/workflows/build.yaml) does the following:
