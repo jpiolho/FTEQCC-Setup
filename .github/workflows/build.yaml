@@ -95,7 +95,7 @@ jobs:
     - name: Rename setup file
       shell: pwsh
       run: |
-        $setupFileName = "FTEQCC_$($env:SETUP_VERSION)_win_x64.msi";
+        $setupFileName = "FTEQCC_win_x64.msi";
         Rename-Item -Path FTEQCC/FTEQCC.msi -NewName $setupFileName
         Write-Output "SETUP_FILENAME=$setupFileName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
