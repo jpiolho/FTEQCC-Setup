@@ -5,7 +5,6 @@ on:
   schedule:
     - cron: '0 6 * * *'
 
-
 permissions: 
   contents: write
   
@@ -26,6 +25,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Fetch build date from website and get setup version
+      id: compare-build-dates
       shell: pwsh
       run: |
         $buildInfo = Invoke-WebRequest -Uri $env:URL_FTEQCC | Select-String -Pattern "Built: .* UTC \d{4}"
@@ -45,12 +45,15 @@ jobs:
           $lastBuildDate = Get-Content $lastBuildDateFile
           if ($currentBuildDate -eq $lastBuildDate) {
             Write-Output "Build dates match. No need to build. Canceling the workflow."
+            echo "::set-output name=build_needed::false"
             exit 0
           } else {
             Write-Output "Build dates do not match. Continuing the workflow."
+            echo "::set-output name=build_needed::true"
           }
         } else {
           Write-Output "First time running, no build date to compare. Continuing with the workflow."
+          echo "::set-output name=build_needed::true"
         }
 
         Set-Content -Path $lastBuildDateFile -Value $currentBuildDate
@@ -64,35 +67,44 @@ jobs:
         $version = "{0:D2}.{1:D2}.{2:D2}" -f $year, $month, $day
         Write-Output "SETUP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
         Write-Output "Setup version: $version"
-        
+      continue-on-error: false
+
     - name: Create temporary directories
+      if: steps.compare-build-dates.outputs.build_needed == 'true'
       shell: pwsh
       run: |
         [System.IO.Directory]::CreateDirectory([System.IO.Path]::GetDirectoryName($env:CONSOLE_ZIP))
         [System.IO.Directory]::CreateDirectory([System.IO.Path]::GetDirectoryName($env:GUI_ZIP))
         
     - name: Download FTEQCC zip files
+      if: steps.compare-build-dates.outputs.build_needed == 'true'
       shell: pwsh
       run: |
         Invoke-WebRequest -Uri $env:URL_CONSOLE_ZIP -OutFile $env:CONSOLE_ZIP
         Invoke-WebRequest -Uri $env:URL_GUI_ZIP -OutFile $env:GUI_ZIP
 
     - name: Setup MSBuild
+      if: steps.compare-build-dates.outputs.build_needed == 'true'
       uses: microsoft/setup-msbuild@v2
 
     - name: Setup NuGet
+      if: steps.compare-build-dates.outputs.build_needed == 'true'
       uses: NuGet/setup-nuget@v2.0.0
       
     - name: Restore dependencies
+      if: steps.compare-build-dates.outputs.build_needed == 'true'
       run: dotnet restore
     
     - name: Restore NuGet packages
+      if: steps.compare-build-dates.outputs.build_needed == 'true'
       run: nuget restore
 
     - name: Build with MSBuild
+      if: steps.compare-build-dates.outputs.build_needed == 'true'
       run: msbuild /p:Configuration=Release
 
     - name: Rename setup file
+      if: steps.compare-build-dates.outputs.build_needed == 'true'
       shell: pwsh
       run: |
         $setupFileName = "FTEQCC_win_x64.msi";
@@ -100,6 +112,7 @@ jobs:
         Write-Output "SETUP_FILENAME=$setupFileName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
     - name: Commit updated build date
+      if: steps.compare-build-dates.outputs.build_needed == 'true'
       shell: pwsh
       run: |
         git config --global user.name "github-actions[bot]"
@@ -109,6 +122,7 @@ jobs:
         git push
 
     - name: Create GitHub Release
+      if: steps.compare-build-dates.outputs.build_needed == 'true'
       id: create_release
       uses: softprops/action-gh-release@v2
       with:
