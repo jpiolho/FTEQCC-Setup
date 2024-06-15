@@ -107,9 +107,38 @@ jobs:
       shell: pwsh
       run: |
         $setupFileName = "FTEQCC_win_x64.msi";
-        Rename-Item -Path FTEQCC/FTEQCC.msi -NewName $setupFileName
+        Rename-Item -Path "FTEQCC/FTEQCC.msi" -NewName $setupFileName
         Write-Output "SETUP_FILENAME=$setupFileName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+        Write-Output "SETUP_FILE=FTEQCC/$setupFileName" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
 
+    - name: Generate winget manifest
+      if: env.BUILD_NEEDED == 'true'
+      shell: pwsh
+      run: |
+        $installerSha256 = (Get-FileHash -Algorithm SHA256 $env:SETUP_FILE).Hash
+        $manifestContent = @"
+        PackageIdentifier: "JPiolho.FTEQCC"
+        PackageVersion: $env:SETUP_VERSION
+        PackageLocale: en-US
+        Publisher: JPiolho
+        PackageName: FTEQCC
+        License: GPL-2.0
+        ShortDescription: The go-to compiler for QuakeC projects
+        Installers:
+          - Architecture: x64
+            InstallerType: msi
+            InstallerUrl: https://github.com/jpiolho/FTEQCC-Setup/releases/download/v$env:SETUP_VERSION/$env:SETUP_FILENAME
+            InstallerSha256: $installerSha256
+        ManifestType: singleton
+        ManifestVersion: 1.6.0
+        "@
+
+        $manifestPath = "$env:GITHUB_WORKSPACE/JPiolho.FTEQCC.yaml"
+        Set-Content -Path $manifestPath -Value $manifestContent -Encoding utf8
+        Write-Output "Winget manifest generated at $manifestPath"
+        
+        Write-Output "MANIFEST_FILENAME=JPiolho.FTEQCC.yaml" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+      
     - name: Commit updated build date
       if: env.BUILD_NEEDED == 'true'
       shell: pwsh
@@ -127,6 +156,8 @@ jobs:
       with:
         tag_name: v${{ env.SETUP_VERSION }}
         name: Release v${{ env.SETUP_VERSION }}
-        files: FTEQCC/${{ env.SETUP_FILENAME }}
+        files: |
+          ${{ env.SETUP_FILE }}
+          ${{ env.MANIFEST_FILENAME }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
