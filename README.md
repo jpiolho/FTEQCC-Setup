@@ -23,3 +23,11 @@ The [github workflow](https://github.com/jpiolho/FTEQCC-Setup/blob/main/.github/
 3. If date differs, then it proceeds with downloading both FTEQCC GUI and Console zip files. If the date is the same then nothing happens.
 4. Extracts zips, builds the setup
 5. Creates a Github release
+
+## Installing
+
+**Winget (Local manifest):**
+* Paste the following into Windows Terminal or Powershell: `Invoke-WebRequest https://github.com/jpiolho/FTEQCC-Setup/releases/latest/download/JPiolho.FTEQCC.yaml -OutFile JPiolho.FTEQCC.yaml;winget install --silent --manifest JPiolho.FTEQCC.yaml;Remove-Item JPiolho.FTEQCC.yaml`
+
+**Manually:**
+* Download .msi from releases and execute
