@@ -5,7 +5,7 @@ This repo contains a [WixSharp](https://github.com/oleg-shilo/wixsharp) project 
 
 You can find the latest build in the releases.
 
-The msi setup is intended to be compatible with [Winget](https://github.com/microsoft/winget-cli). Although that's still a work in progress.
+The msi setup is intended to be compatible with [Winget](https://github.com/microsoft/winget-cli). Currently has been tested in a private repository using [Wingetty](https://github.com/thilojaeggi/WinGetty)
 
 ## What does the setup do?
 The msi setup installs FTEQCC as a normal app on your computer. It includes both console and gui version.
