@@ -79,10 +79,11 @@ namespace FTEQCC
                             }
             )
             {
-                Description = "The most advanced QuakeC compiler",
+                Description = "The go-to compiler for QuakeC projects",
                 Platform = Platform.x64,
                 ControlPanelInfo =
                 {
+                    Name = "FTEQCC",
                     ProductIcon = IconName
                 },
                 Version = version,
